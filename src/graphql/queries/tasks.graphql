@@ -1,0 +1,46 @@
+query SelectTasksByUserId($user_id: String!) {
+  tasks(order_by: { id: desc }, where: { user_id: { _eq: $user_id } }) {
+    id
+    title
+    status
+    priority
+  }
+}
+
+mutation InsertTasksOne(
+  $title: String!
+  $status: String!
+  $priority: String!
+  $user_id: String!
+) {
+  insert_tasks_one(
+    object: {
+      title: $title
+      status: $status
+      priority: $priority
+      user_id: $user_id
+    }
+  ) {
+    id
+  }
+}
+
+mutation DeleteTasksByPk($id: Int!) {
+  delete_tasks_by_pk(id: $id) {
+    id
+  }
+}
+
+mutation UpdateTasksByPk(
+  $id: Int!
+  $title: String!
+  $status: String!
+  $priority: String!
+) {
+  update_tasks_by_pk(
+    pk_columns: { id: $id }
+    _set: { title: $title, status: $status, priority: $priority }
+  ) {
+    id
+  }
+}
