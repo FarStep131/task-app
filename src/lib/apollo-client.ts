@@ -5,6 +5,22 @@ import {
   NextSSRApolloClient,
   NextSSRInMemoryCache,
 } from "@apollo/experimental-nextjs-app-support/ssr";
+import { setContext } from "@apollo/client/link/context";
+import { getAuthSession } from "@/lib/auth";
+
+export const authLink = setContext(async (_, { headers }) => {
+  const session = await getAuthSession();
+  if (session?.user.token) {
+    return {
+      headers: {
+        ...headers,
+        authorization: `Bearer ${session.user.token}`,
+      },
+    };
+  } else {
+    return { headers };
+  }
+});
 
 const errorLink = onError((errors) => {
   const { graphQLErrors, networkError } = errors;
@@ -22,7 +38,7 @@ export const { getClient } = registerApolloClient(() => {
     uri: process.env.HASURA_GQL_URL,
   });
 
-  const link = ApolloLink.from([errorLink, httpLink]);
+  const link = ApolloLink.from([authLink, errorLink, httpLink]);
 
   return new NextSSRApolloClient({
     cache: new NextSSRInMemoryCache(),
