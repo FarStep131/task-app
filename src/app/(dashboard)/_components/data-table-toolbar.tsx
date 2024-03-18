@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { Session } from "next-auth";
+import { ModalForm } from "./modal-form";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { createTaskFormValidator } from "@/lib/validations/task";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertTasksOne } from "@/actions/task";
+import { toast } from "@/components/ui/use-toast";
+import { revalidatePaths } from "@/lib/revalidate-paths";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -16,11 +25,35 @@ interface DataTableToolbarProps<TData> {
 
 export function DataTableToolbar<TData>({
   table,
+  session,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
+  const [open, setOpen] = useState(false);
+  const form = useForm<z.infer<typeof createTaskFormValidator>>({
+    resolver: zodResolver(createTaskFormValidator),
+  });
+
+  async function onSubmit(data: z.infer<typeof createTaskFormValidator>) {
+    const { data: newData, errors } = await insertTasksOne(data);
+    if (newData?.insert_tasks_one?.id && !errors) {
+      toast({
+        title: "タスクを追加しました",
+      });
+      form.reset({
+        title: "",
+        status: "",
+        priority: "",
+      });
+      revalidatePaths(["/"]);
+    }
+  }
+
   const handleOpenModal = () => {
-    console.log("handleOpenModal");
+    form.reset({
+      user_id: session.user.id,
+    });
+    setOpen(true);
   };
 
   return (
@@ -65,6 +98,13 @@ export function DataTableToolbar<TData>({
       <Button className="ml-2" onClick={handleOpenModal}>
         New Task
       </Button>
+      <ModalForm
+        action="create"
+        open={open}
+        setOpen={setOpen}
+        form={form}
+        onSubmit={onSubmit}
+      />
     </div>
   );
 }

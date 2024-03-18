@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { priorities, statuses } from "../data/data";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { SelectTasksByUserIdQuery } from "@/graphql/generated/gql.types";
+import { DataTableRowActions } from "./data-table-row-actions";
 
 export const columns: ColumnDef<SelectTasksByUserIdQuery["tasks"][number]>[] = [
   {
@@ -83,6 +84,6 @@ export const columns: ColumnDef<SelectTasksByUserIdQuery["tasks"][number]>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <>Action</>,
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
