@@ -1,0 +1,19 @@
+mutation InsertUsersOne($id: String!, $email: String!, $username: String!) {
+  insert_users_one(object: { id: $id, email: $email, username: $username }) {
+    id
+  }
+}
+
+query SelectUsersByEmail($email: String!) {
+  users(where: { email: { _eq: $email } }) {
+    id
+    email
+    username
+  }
+}
+
+query SelectUsersByUsername($username: String!) {
+  users(where: { username: { _eq: $username } }) {
+    id
+  }
+}
